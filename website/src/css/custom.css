@@ -4,12 +4,15 @@
  * work well for content-centric websites.
  */
 
+ /* Open Sans */
+ @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
  /* Noto Sans JP */
  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-font-family-base: 'Noto Sans JP', sans-serif;
+  --ifm-font-family-base: 'Open Sans', sans-serif;
+  /* --ifm-font-family-base: 'Noto Sans JP', sans-serif; */
   --ifm-color-primary: #0077ff; /* rspress color */
   --ifm-menu-color: #3c3c3ca8; /* rspress color */
   --ifm-navbar-background-color: #004F9B; /* yk nav color */
