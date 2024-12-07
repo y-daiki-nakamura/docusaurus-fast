@@ -116,9 +116,15 @@ article h2 {
   font-size: 1.625rem !important;
 }
 
-/** In mobile view, reduce the padding */
+/** In mobile view sidebar menu color */
 @media screen and (max-width: 996px) {
+  .navbar__toggle  > svg > path{
+    stroke: white;
+  }
   .menu{
     background: white;
+  }
+  [data-theme='dark'] .menu{
+    background: #1B1B1D;
   }
 }
