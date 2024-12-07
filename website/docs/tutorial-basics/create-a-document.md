@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# Create a Document
+# ドキュメントを作成する
 
 Documents are **groups of pages** connected through:
 
