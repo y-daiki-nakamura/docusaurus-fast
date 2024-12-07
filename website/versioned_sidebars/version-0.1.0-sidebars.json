@@ -1,0 +1,24 @@
+{
+  "tutorialSidebar": [
+    "intro",
+    {
+      "type": "category",
+      "label": "Tutorial",
+      "items": [
+        "tutorial-basics/create-a-document"
+      ]
+    },
+    {
+      "type": "category",
+      "label": "Extra",
+      "items": [
+        "tutorial-extras/manage-docs-versions"
+      ],
+      "collapsed": false
+    }
+  ],
+  "apiSidebar": [
+    "api/doc3",
+    "api/doc4"
+  ]
+}
