@@ -112,6 +112,12 @@ ul.menu__list:not(.theme-doc-sidebar-menu){
 .markdown h6 {
   --ifm-h6-font-size: 0.875rem;
 }
+
+/** Blog */
+article {
+  padding-bottom: 2rem;
+  border-bottom: 0.1px solid #3c3c3ca8;
+}
 article h2 {
   font-size: 1.625rem !important;
 }

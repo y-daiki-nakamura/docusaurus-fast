@@ -23,7 +23,7 @@ const sidebars = {
     'intro',
     {
       type: 'category',
-      label: 'Tutorial',
+      label: 'チュートリアル',
       items: [
         'tutorial-basics/create-a-document',
         'tutorial-basics/create-a-blog-post',
@@ -32,7 +32,7 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'Extra',
+      label: 'エクストラ',
       items: ['tutorial-extras/manage-docs-versions'],
       collapsed: false,
     },
