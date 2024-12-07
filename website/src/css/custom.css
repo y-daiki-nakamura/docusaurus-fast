@@ -6,7 +6,21 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
+  --ifm-font-family-base: 'Circular'; /* supabase doc font */
+  --ifm-color-primary: #0077ff; /* rspress color */
+  --ifm-menu-color: #3c3c3ca8; /* rspress color */
+  --ifm-navbar-background-color: #004F9B; /* yk color */
+  --ifm-navbar-link-color: white; /* yk color */
+  --ifm-navbar-link-hover-color: #33adff;
+
+  --ifm-h1-font-size: 2rem;
+  --ifm-h2-font-size: 1.625rem;
+  --ifm-h3-font-size: 1.375rem;
+  --ifm-h4-font-size: 1.125rem;
+  --ifm-h5-font-size: 1rem;
+  --ifm-h6-font-size: 0.875rem;
+
+  /* --ifm-color-primary: #2e8555; */
   --ifm-color-primary-dark: #29784c;
   --ifm-color-primary-darker: #277148;
   --ifm-color-primary-darkest: #205d3b;
@@ -15,11 +29,15 @@
   --ifm-color-primary-lightest: #3cad6e;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
+  --ifm-color-primary: #33adff; /* rspress color */
+  --ifm-menu-color: #ebebeb8f; /* rspress color */
+
+  /* --ifm-color-primary: #25c2a0; */
   --ifm-color-primary-dark: #21af90;
   --ifm-color-primary-darker: #1fa588;
   --ifm-color-primary-darkest: #1a8870;
@@ -27,4 +45,55 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.navbar__link{
+  font-size: 14px;
+}
+
+.theme-doc-sidebar-item-link-level-1{
+  font-size: 14px;
+  font-weight: bold;
+}
+.menu__list-item-collapsible{
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.menu__link{
+  margin-top: .125rem;
+  padding: .5rem;
+}
+
+.menu__list-item:not(:first-child){
+  margin-top: 0;
+}
+
+ul.menu__list:not(.theme-doc-sidebar-menu){
+  font-size: 13px;
+  border-left: 0.1px solid #3c3c3ca8;
+  padding-left: 1rem;
+}
+
+/* overwrite font-size */
+.markdown h1:first-child {
+  --ifm-h1-font-size: 2rem;
+}
+.markdown h2 {
+  --ifm-h2-font-size: 1.625rem;
+}
+.markdown h3 {
+  --ifm-h3-font-size: 1.375rem;
+}
+.markdown h4 {
+  --ifm-h4-font-size: 1.125rem;
+}
+.markdown h5 {
+  --ifm-h5-font-size: 1rem;
+}
+.markdown h6 {
+  --ifm-h6-font-size: 0.875rem;
+}
+h2 {
+  font-size: var(--ifm-h2-font-size);
 }
