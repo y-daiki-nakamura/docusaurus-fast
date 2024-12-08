@@ -15,6 +15,8 @@
   /* --ifm-font-family-base: 'Noto Sans JP', sans-serif; */
   --ifm-color-primary: #0077ff; /* rspress color */
   --ifm-menu-color: #3c3c3ca8; /* rspress color */
+  --ifm-background-color: white;
+
   --ifm-navbar-background-color: #004F9B; /* yk nav color */
   --ifm-navbar-link-color: white; /* yk nav color */
   --ifm-navbar-link-hover-color: #33adff;
@@ -51,6 +53,10 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
+html[data-theme='dark'] {
+  --ifm-background-color: #191D24; 
+}
+
 /* light/dark mode toggle icon color */
 [class*="ToggleIcon"] > path{
   fill: white; /* SVGの色を白に設定 */
@@ -83,9 +89,13 @@
 
 ul.menu__list:not(.theme-doc-sidebar-menu){
   font-size: 13px;
-  border-left: 0.1px solid #3c3c3ca8;
+  border-left: 1px solid #3c3c3c1a;
   padding-left: 0rem;
-  margin-left: .5rem;
+  margin-left: 1rem;
+}
+
+[data-theme='dark'] ul.menu__list:not(.theme-doc-sidebar-menu){
+  border-left: 1px solid #3c3c3ca8;
 }
 
 /* menu arrow icon */
@@ -99,6 +109,11 @@ ul.menu__list:not(.theme-doc-sidebar-menu){
 }
 .markdown h2 {
   --ifm-h2-font-size: 1.625rem;
+  border-top: 1px solid #3c3c3c1a;
+  padding-top: 2rem;
+}
+[data-theme='dark'] .markdown h2 {
+  border-top: 1px solid #3c3c3ca8;
 }
 .markdown h3 {
   --ifm-h3-font-size: 1.375rem;
