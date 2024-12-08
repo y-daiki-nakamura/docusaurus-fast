@@ -28,6 +28,15 @@ const sidebars = {
         'tutorial-basics/create-a-document',
         'tutorial-basics/create-a-blog-post',
         'tutorial-basics/create-a-page',
+        {
+          type: 'category',
+          label: '3階層',
+          items: [
+            'tutorial-basics/create-a-document',
+            'tutorial-basics/create-a-blog-post',
+            'tutorial-basics/create-a-page',
+          ],
+        },
       ],
     },
     {
