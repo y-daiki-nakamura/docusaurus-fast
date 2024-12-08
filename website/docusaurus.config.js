@@ -32,8 +32,8 @@ const config = {
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: 'jp',
+    locales: ['jp'],
   },
 
   presets: [
@@ -47,13 +47,13 @@ const config = {
           // Remove this to remove the "edit this page" links.
           editUrl:
             'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-          lastVersion: 'current',
-          versions: {
-            current: {
-              label: 'development 1.0.0',
-              path: '1.0.0',
-            },
-          },            
+          lastVersion: '0.1.0',
+          // versions: {
+          //   current: {
+          //     label: 'latest',
+          //     path: '0.1.0',
+          //   },
+          // },            
         },
         blog: {
           showReadingTime: true,
@@ -92,7 +92,7 @@ const config = {
           {
             type: 'docsVersionDropdown',
             position: 'left',
-            dropdownItemsAfter: [{to: '/versions', label: 'All versions'}],
+            // dropdownItemsAfter: [{to: '/versions', label: 'All versions'}],
             dropdownActiveClassDisabled: true,
           },
           {
