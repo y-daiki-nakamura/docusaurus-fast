@@ -1,7 +1,7 @@
 name: Bug Report
 description: File a bug report
 labels: ["bug"]
-projects: ["y-daiki-nakamura/projects/2"]
+projects: ["y-daiki-nakamura/1"]
 title: "[BUG]: About bug title"
 
 body:
