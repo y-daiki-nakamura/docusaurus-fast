@@ -6,6 +6,7 @@ on:
 permissions:
   contents: read
   issues: read
+  projects: read
 
 jobs:
   update-project-version:
@@ -17,44 +18,6 @@ jobs:
           echo "REPO=${{ github.event.repository.name }}"
           echo "NUMBER=${{ github.event.issue.number }}"
 
-      - name: Test GraphQL query (debug)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          OWNER="${{ github.repository_owner }}"
-          REPO="${{ github.event.repository.name }}"
-          NUMBER=${{ github.event.issue.number }}"
-
-          echo "Running GraphQL query with:"
-          echo "OWNER=$OWNER"
-          echo "REPO=$REPO"
-          echo "NUMBER=$NUMBER"
-
-          QUERY='
-          query($owner:String!,$repo:String!,$number:Int!) {
-            repository(owner:$owner, name:$repo) {
-              issue(number:$number) {
-                title
-                projectItems(first: 1) {
-                  edges {
-                    node {
-                      project {
-                        id
-                        title
-                        url
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }'
-
-          RESULT=$(gh api graphql -f query="$QUERY" -f owner="$OWNER" -f repo="$REPO" -f number="$NUMBER")
-
-          echo "Query Result:"
-          echo "$RESULT"
-      
       - name: Extract "Version" from issue body
         id: extract_version
         run: |
@@ -64,8 +27,12 @@ jobs:
           echo "Extracted Version=$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Get Project and Item IDs from Issue
-        id: get_ids
+      - name: Set Project ID (Fixed)
+        id: set_project_id
+        run: echo "project_id=PVT_kwHOA1KAF84At_OY" >> $GITHUB_OUTPUT
+
+      - name: Get Project Item ID from Issue (Fixed Project ID)
+        id: get_item_id
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -74,18 +41,14 @@ jobs:
           NUMBER=${{ github.event.issue.number }}
 
           QUERY='
-          query($owner:String!,$repo:String!,$number:Int!) {
+          query($owner:String!,$repo:String!,$number:Int!,$projectId:ID!) {
             repository(owner:$owner,name:$repo) {
               issue(number:$number) {
-                projectItems(first: 1) {
-                  edges {
-                    node {
+                projectItems(first: 50) {
+                  nodes {
+                    id
+                    project {
                       id
-                      project {
-                        id
-                        title
-                        url
-                      }
                     }
                   }
                 }
@@ -93,31 +56,28 @@ jobs:
             }
           }'
 
-          RESULT=$(gh api graphql -f query="$QUERY" -f owner="$OWNER" -f repo="$REPO" -f number="$NUMBER")
+          RESULT=$(gh api graphql -f query="$QUERY" -f owner="$OWNER" -f repo="$REPO" -f number="$NUMBER" -f projectId="${{ steps.set_project_id.outputs.project_id }}")
 
           echo "ProjectItems query result:"
           echo "$RESULT"
 
-          ITEM_ID=$(echo "$RESULT" | jq -r '.data.repository.issue.projectItems.edges[0].node.id')
-          PROJECT_ID=$(echo "$RESULT" | jq -r '.data.repository.issue.projectItems.edges[0].node.project.id')
+          # PVT_kwHOA1KAF84At_OY に紐づいた itemを特定
+          ITEM_ID=$(echo "$RESULT" | jq -r --arg PID "${{ steps.set_project_id.outputs.project_id }}" '.data.repository.issue.projectItems.nodes[] | select(.project.id==$PID) | .id')
 
           echo "ITEM_ID=$ITEM_ID"
-          echo "PROJECT_ID=$PROJECT_ID"
-
-          if [ "$ITEM_ID" = "null" ] || [ "$PROJECT_ID" = "null" ]; then
-            echo "Project or Item not found. Make sure the issue is linked to a Project V2."
+          if [ -z "$ITEM_ID" ]; then
+            echo "Item not found for this project. Make sure the issue is linked to the project."
             exit 1
           fi
 
           echo "item_id=$ITEM_ID" >> $GITHUB_OUTPUT
-          echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
 
-      - name: Get Fields from Project
+      - name: Get Fields from Project (Fixed Project ID)
         id: get_fields
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PROJECT_ID=${{ steps.get_ids.outputs.project_id }}
+          PROJECT_ID=${{ steps.set_project_id.outputs.project_id }}
 
           QUERY='
           query($projectId:ID!) {
@@ -192,8 +152,8 @@ jobs:
         uses: actions/github-script@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          projectId: ${{ steps.get_ids.outputs.project_id }}
-          itemId: ${{ steps.get_ids.outputs.item_id }}
+          projectId: ${{ steps.set_project_id.outputs.project_id }}
+          itemId: ${{ steps.get_item_id.outputs.item_id }}
           fieldId: ${{ steps.get_fields.outputs.version_field_id }}
           optionId: ${{ steps.get_option.outputs.option_id }}
         with:
@@ -223,8 +183,8 @@ jobs:
         uses: actions/github-script@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          projectId: ${{ steps.get_ids.outputs.project_id }}
-          itemId: ${{ steps.get_ids.outputs.item_id }}
+          projectId: ${{ steps.set_project_id.outputs.project_id }}
+          itemId: ${{ steps.get_item_id.outputs.item_id }}
           fieldId: ${{ steps.get_fields.outputs.version_field_id }}
           version: ${{ steps.extract_version.outputs.version }}
         with:
