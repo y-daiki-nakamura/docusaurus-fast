@@ -1,7 +1,7 @@
 name: Update Project Version Field
 on:
   issues:
-    types: [opened]
+    types: [opened, reopened]
 
 permissions:
   contents: read
@@ -30,7 +30,7 @@ jobs:
         id: set_project_id
         run: echo "project_id=PVT_kwHOA1KAF84At_OY" >> $GITHUB_OUTPUT
 
-      - name: Get Project Item ID from Issue (Fixed Project ID)
+      - name: Get Project Item ID from Issue
         id: get_item_id
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -38,9 +38,10 @@ jobs:
           OWNER="${{ github.repository_owner }}"
           REPO="${{ github.event.repository.name }}"
           NUMBER=${{ github.event.issue.number }}
+          PROJECT_ID=${{ steps.set_project_id.outputs.project_id }}
 
           QUERY='
-          query($owner:String!,$repo:String!,$number:Int!,$projectId:ID!) {
+          query($owner:String!,$repo:String!,$number:Int!) {
             repository(owner:$owner,name:$repo) {
               issue(number:$number) {
                 projectItems(first: 50) {
@@ -55,13 +56,13 @@ jobs:
             }
           }'
 
-          RESULT=$(gh api graphql -f query="$QUERY" -f owner="$OWNER" -f repo="$REPO" -f number="$NUMBER" -f projectId="${{ steps.set_project_id.outputs.project_id }}")
+          RESULT=$(gh api graphql -f query="$QUERY" -f owner="$OWNER" -f repo="$REPO" -f number="$NUMBER")
 
           echo "ProjectItems query result:"
           echo "$RESULT"
 
-          # PVT_kwHOA1KAF84At_OY に紐づいた itemを特定
-          ITEM_ID=$(echo "$RESULT" | jq -r --arg PID "${{ steps.set_project_id.outputs.project_id }}" '.data.repository.issue.projectItems.nodes[] | select(.project.id==$PID) | .id')
+          # 固定のPROJECT_IDに合致するitemを検索
+          ITEM_ID=$(echo "$RESULT" | jq -r --arg PID "$PROJECT_ID" '.data.repository.issue.projectItems.nodes[] | select(.project.id==$PID) | .id')
 
           echo "ITEM_ID=$ITEM_ID"
           if [ -z "$ITEM_ID" ]; then
@@ -71,7 +72,7 @@ jobs:
 
           echo "item_id=$ITEM_ID" >> $GITHUB_OUTPUT
 
-      - name: Get Fields from Project (Fixed Project ID)
+      - name: Get Fields from Project
         id: get_fields
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
