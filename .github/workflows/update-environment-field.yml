@@ -3,17 +3,66 @@ on:
   issues:
     types: [opened]
 
+permissions:
+  contents: read
+  issues: read
+  projects: read
+
 jobs:
   update-project-version:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug info
+        run: |
+          echo "OWNER=${{ github.repository_owner }}"
+          echo "REPO=${{ github.event.repository.name }}"
+          echo "NUMBER=${{ github.event.issue.number }}"
+
+      - name: Test GraphQL query (debug)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OWNER="${{ github.repository_owner }}"
+          REPO="${{ github.event.repository.name }}"
+          NUMBER=${{ github.event.issue.number }}"
+
+          echo "Running GraphQL query with:"
+          echo "OWNER=$OWNER"
+          echo "REPO=$REPO"
+          echo "NUMBER=$NUMBER"
+
+          QUERY='
+          query($owner:String!,$repo:String!,$number:Int!) {
+            repository(owner:$owner, name:$repo) {
+              issue(number:$number) {
+                title
+                projectItems(first: 1) {
+                  edges {
+                    node {
+                      project {
+                        id
+                        title
+                        url
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }'
+
+          RESULT=$(gh api graphql -f query="$QUERY" -f owner="$OWNER" -f repo="$REPO" -f number="$NUMBER")
+
+          echo "Query Result:"
+          echo "$RESULT"
+      
       - name: Extract "Version" from issue body
         id: extract_version
         run: |
           BODY="${{ github.event.issue.body }}"
           # "### Version" の次の行を取得
           VERSION=$(echo "$BODY" | awk '/^### Version/{getline;print}')
-          # 必要に応じてバリデーション可
+          echo "Extracted Version=$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Get Project and Item IDs from Issue
@@ -22,12 +71,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           OWNER="${{ github.repository_owner }}"
-          REPO=$(echo "${{ github.event.repository.name }}")
+          REPO="${{ github.event.repository.name }}"
           NUMBER=${{ github.event.issue.number }}
 
           QUERY='
-          query($owner:String!, $repo:String!, $number:Int!) {
-            repository(owner:$owner, name:$repo) {
+          query($owner:String!,$repo:String!,$number:Int!) {
+            repository(owner:$owner,name:$repo) {
               issue(number:$number) {
                 projectItems(first: 1) {
                   edges {
@@ -45,10 +94,16 @@ jobs:
             }
           }'
 
-          RESULT=$(gh api graphql -f query="$QUERY" -F owner="$OWNER" -F repo="$REPO" -F number="$NUMBER")
+          RESULT=$(gh api graphql -f query="$QUERY" -f owner="$OWNER" -f repo="$REPO" -f number="$NUMBER")
+
+          echo "ProjectItems query result:"
+          echo "$RESULT"
 
           ITEM_ID=$(echo "$RESULT" | jq -r '.data.repository.issue.projectItems.edges[0].node.id')
           PROJECT_ID=$(echo "$RESULT" | jq -r '.data.repository.issue.projectItems.edges[0].node.project.id')
+
+          echo "ITEM_ID=$ITEM_ID"
+          echo "PROJECT_ID=$PROJECT_ID"
 
           if [ "$ITEM_ID" = "null" ] || [ "$PROJECT_ID" = "null" ]; then
             echo "Project or Item not found. Make sure the issue is linked to a Project V2."
@@ -92,9 +147,10 @@ jobs:
           }
           '
 
-          RESULT=$(gh api graphql -f query="$QUERY" -F projectId="$PROJECT_ID")
+          RESULT=$(gh api graphql -f query="$QUERY" -f projectId="$PROJECT_ID")
+          echo "Fields query result:"
+          echo "$RESULT"
 
-          # Versionフィールドを検索
           VERSION_FIELD=$(echo "$RESULT" | jq -c '.data.node.fields.nodes[] | select(.name=="Version")')
           if [ -z "$VERSION_FIELD" ]; then
             echo "Version field not found."
@@ -102,14 +158,16 @@ jobs:
           fi
 
           VERSION_FIELD_ID=$(echo "$VERSION_FIELD" | jq -r '.id')
-          echo "version_field_id=$VERSION_FIELD_ID" >> $GITHUB_OUTPUT
-
-          # フィールドがシングルセレクトの場合を想定 (.__typename が ProjectV2SingleSelectField)
           FIELD_TYPE=$(echo "$VERSION_FIELD" | jq -r '.__typename')
+          echo "Version field ID: $VERSION_FIELD_ID"
+          echo "Version field type: $FIELD_TYPE"
+
+          echo "version_field_id=$VERSION_FIELD_ID" >> $GITHUB_OUTPUT
           echo "field_type=$FIELD_TYPE" >> $GITHUB_OUTPUT
 
           if [ "$FIELD_TYPE" = "ProjectV2SingleSelectField" ]; then
             echo "$VERSION_FIELD" | jq -c '.options' > options.json
+            echo "Single select options saved to options.json"
           fi
 
       - name: Determine Single Select Option
@@ -117,63 +175,28 @@ jobs:
         if: steps.get_fields.outputs.field_type == 'ProjectV2SingleSelectField'
         run: |
           VERSION="${{ steps.extract_version.outputs.version }}"
-
-          # options.json から該当オプションIDを探す
+          echo "Looking for option matching VERSION=$VERSION"
           OPTION_ID=$(jq -r --arg ver "$VERSION" '.[] | select(.name==$ver) | .id' options.json)
 
           if [ -z "$OPTION_ID" ]; then
             echo "No matching single-select option found for Version=$VERSION"
+            echo "Available options:"
+            cat options.json
             exit 1
           fi
 
+          echo "Found option_id=$OPTION_ID"
           echo "option_id=$OPTION_ID" >> $GITHUB_OUTPUT
 
-      - name: Update the Version field in the Project
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PROJECT_ID=${{ steps.get_ids.outputs.project_id }}
-          ITEM_ID=${{ steps.get_ids.outputs.item_id }}
-          VERSION="${{ steps.extract_version.outputs.version }}"
-          VERSION_FIELD_ID=${{ steps.get_fields.outputs.version_field_id }}
-          FIELD_TYPE=${{ steps.get_fields.outputs.field_type }}
-
-          # フィールドタイプに応じてMutationを組み立てる
-          # シングルセレクトの場合
-          if [ "$FIELD_TYPE" = "ProjectV2SingleSelectField" ]; then
-            OPTION_ID=${{ steps.get_option.outputs.option_id }}
-            VALUE_JSON="{\"singleSelectOptionId\": \"$OPTION_ID\"}"
-          else
-            # テキストフィールド等の場合はこちら
-            VALUE_JSON="{\"text\": \"$VERSION\"}"
-          fi
-
-          MUTATION='
-          mutation($projectId:ID!,$itemId:ID!,$fieldId:ID!,$value:ProjectV2FieldValue!) {
-            updateProjectV2ItemFieldValue(
-              input: {
-                projectId:$projectId
-                itemId:$itemId
-                fieldId:$fieldId
-                value:$value
-              }
-            ) {
-              projectV2Item {
-                id
-              }
-            }
-          }
-          '
-
-          # gh api graphql では、valueのオブジェクト引数を直接指定できないため、一度ファイル経由が必要か、
-          # またはgithub-scriptを用いて実行することを検討してください。
-          #
-          # ここでは簡略化のため、github-scriptを使う例を示します。
-          # (GitHub Actionsワークフロー内でgithub-scriptアクションを使用)
-
-      - name: Update Field via github-script
+      - name: Update Field via github-script (single-select)
         if: steps.get_fields.outputs.field_type == 'ProjectV2SingleSelectField'
         uses: actions/github-script@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          projectId: ${{ steps.get_ids.outputs.project_id }}
+          itemId: ${{ steps.get_ids.outputs.item_id }}
+          fieldId: ${{ steps.get_fields.outputs.version_field_id }}
+          optionId: ${{ steps.get_option.outputs.option_id }}
         with:
           script: |
             const { projectId, itemId, fieldId, optionId } = process.env;
@@ -187,22 +210,24 @@ jobs:
               }
             }`;
 
-            await github.graphql(mutation, {
+            const result = await github.graphql(mutation, {
               projectId,
               itemId,
               fieldId,
               value: optionId
             });
+
+            console.log("Update result:", result);
+
+      - name: Update Field via github-script (text fallback)
+        if: steps.get_fields.outputs.field_type != 'ProjectV2SingleSelectField'
+        uses: actions/github-script@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           projectId: ${{ steps.get_ids.outputs.project_id }}
           itemId: ${{ steps.get_ids.outputs.item_id }}
           fieldId: ${{ steps.get_fields.outputs.version_field_id }}
-          optionId: ${{ steps.get_option.outputs.option_id }}
-
-      - name: Update Field via github-script (text fallback)
-        if: steps.get_fields.outputs.field_type != 'ProjectV2SingleSelectField'
-        uses: actions/github-script@v6
+          version: ${{ steps.extract_version.outputs.version }}
         with:
           script: |
             const { projectId, itemId, fieldId, version } = process.env;
@@ -216,15 +241,11 @@ jobs:
               }
             }`;
 
-            await github.graphql(mutation, {
+            const result = await github.graphql(mutation, {
               projectId,
               itemId,
               fieldId,
               value: version
             });
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          projectId: ${{ steps.get_ids.outputs.project_id }}
-          itemId: ${{ steps.get_ids.outputs.item_id }}
-          fieldId: ${{ steps.get_fields.outputs.version_field_id }}
-          version: ${{ steps.extract_version.outputs.version }}
+
+            console.log("Update result:", result);
