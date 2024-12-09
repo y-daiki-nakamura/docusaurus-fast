@@ -1,0 +1,121 @@
+name: Update Environment Field in Project
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  update-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract Environment from Issue Body
+        id: extract_env
+        run: |
+          echo "Extracting environment info..."
+          ENVIRONMENT=$(echo "${{ github.event.issue.body }}" | grep "Environment | 環境情報:" | sed 's/Environment | 環境情報: //')
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_ENV
+
+      - name: Get Linked Project and Item ID
+        id: get_project_info
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { graphql } = require('@octokit/graphql');
+
+            const issueId = context.payload.issue.node_id;
+
+            // Get linked project and item ID
+            const result = await graphql(`
+              query($issueId: ID!) {
+                node(id: $issueId) {
+                  ... on Issue {
+                    projectItems(first: 1) {
+                      nodes {
+                        project {
+                          id
+                        }
+                        id
+                      }
+                    }
+                  }
+                }
+              }
+            `, {
+              issueId,
+              headers: {
+                authorization: `Bearer ${process.env.GITHUB_TOKEN}`
+              }
+            });
+
+            if (result.node.projectItems.nodes.length === 0) {
+              core.setFailed("No linked project found for the issue.");
+            }
+
+            const project = result.node.projectItems.nodes[0].project;
+            const itemId = result.node.projectItems.nodes[0].id;
+
+            console.log("Linked Project ID:", project.id);
+            console.log("Linked Item ID:", itemId);
+
+            return {
+              projectId: project.id,
+              itemId: itemId
+            };
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Environment Field in Project
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { graphql } = require('@octokit/graphql');
+
+            const projectId = "${{ steps.get_project_info.outputs.projectId }}";
+            const itemId = "${{ steps.get_project_info.outputs.itemId }}";
+            const environment = process.env.environment;
+
+            if (!environment) {
+              console.log("No environment value extracted. Skipping update.");
+              return;
+            }
+
+            // Map environment values to their option IDs
+            const environmentOptions = {
+              "Development": "4fa26edc",
+              "UAT": "329a3eec",
+              "Valid": "60906637"
+            };
+
+            const optionId = environmentOptions[environment];
+            if (!optionId) {
+              console.log(`Environment value '${environment}' does not match any known options.`);
+              return;
+            }
+
+            const fieldId = "PVTSSF_lAHOA1KAF84At_OYzgkqJe8"; // Environment Field ID
+
+            await graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: { singleSelectOptionId: $optionId }
+                }) {
+                  clientMutationId
+                }
+              }
+            `, {
+              projectId,
+              itemId,
+              fieldId,
+              optionId,
+              headers: {
+                authorization: `Bearer ${process.env.GITHUB_TOKEN}`
+              }
+            });
+
+            console.log(`Environment field updated to: ${environment}`);
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
