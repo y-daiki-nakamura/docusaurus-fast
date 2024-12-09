@@ -9,80 +9,67 @@ jobs:
   update-environment:
     runs-on: ubuntu-latest
     steps:
+      # 環境情報をIssue Bodyから抽出
       - name: Extract Environment from Issue Body
         id: extract_env
         run: |
           echo "Extracting environment info..."
           ENVIRONMENT=$(echo "${{ github.event.issue.body }}" | grep "Environment | 環境情報:" | sed 's/Environment | 環境情報: //')
           echo "environment=${ENVIRONMENT}" >> $GITHUB_ENV
+        shell: bash
 
-      - name: Update Environment Field
+      # 環境情報を確認
+      - name: Log Extracted Environment
+        run: echo "Extracted environment: ${{ env.environment }}"
+
+      # ProjectのItem IDと関連情報を取得
+      - name: Get Project and Item ID
+        id: get_project_info
         uses: actions/github-script@v6.4.1
         with:
           script: |
-            const environment = process.env.environment;
-            console.log(`Environment extracted: ${environment}`);
-
-      - name: Get Linked Project and Item ID
-        id: get_project_info
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { graphql } = require('@octokit/graphql');
-
             const issueId = context.payload.issue.node_id;
-
-            // Get linked project and item ID
-            const result = await graphql(`
+            const projectItems = await github.graphql(`
               query($issueId: ID!) {
                 node(id: $issueId) {
                   ... on Issue {
                     projectItems(first: 1) {
                       nodes {
+                        id
                         project {
                           id
                         }
-                        id
                       }
                     }
                   }
                 }
               }
-            `, {
-              issueId,
-              headers: {
-                authorization: `Bearer ${process.env.GITHUB_TOKEN}`
-              }
-            });
+            `, { issueId });
 
-            if (result.node.projectItems.nodes.length === 0) {
-              throw new Error("No linked project found for the issue.");
+            if (!projectItems.node.projectItems.nodes.length) {
+              throw new Error("No linked project found for this issue.");
             }
 
-            const project = result.node.projectItems.nodes[0].project;
-            const itemId = result.node.projectItems.nodes[0].id;
+            const item = projectItems.node.projectItems.nodes[0];
+            return {
+              projectId: item.project.id,
+              itemId: item.id
+            };
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            core.setOutput("projectId", project.id);
-            core.setOutput("itemId", itemId);
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      # 環境情報をProject V2に設定
       - name: Update Environment Field in Project
-        uses: actions/github-script@v6
+        uses: actions/github-script@v6.4.1
         with:
           script: |
-            const { graphql } = require('@octokit/graphql');
-
-            const projectId = "${{ steps.get_project_info.outputs.projectId }}";
-            const itemId = "${{ steps.get_project_info.outputs.itemId }}";
             const environment = process.env.environment;
-
             if (!environment) {
-              console.log("No environment value extracted. Skipping update.");
+              console.log("No environment value provided. Skipping update.");
               return;
             }
 
-            // Map environment values to their option IDs
+            // 環境オプションをマッピング
             const environmentOptions = {
               "Development": "4fa26edc",
               "UAT": "329a3eec",
@@ -91,13 +78,14 @@ jobs:
 
             const optionId = environmentOptions[environment];
             if (!optionId) {
-              console.log(`Environment value '${environment}' does not match any known options.`);
-              return;
+              throw new Error(`Environment value '${environment}' does not match any known options.`);
             }
 
-            const fieldId = "PVTSSF_lAHOA1KAF84At_OYzgkqJe8"; // Environment Field ID
+            const projectId = "${{ steps.get_project_info.outputs.projectId }}";
+            const itemId = "${{ steps.get_project_info.outputs.itemId }}";
+            const fieldId = "PVTSSF_lAHOA1KAF84At_OYzgkqJe8"; // EnvironmentフィールドID
 
-            await graphql(`
+            await github.graphql(`
               mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
                 updateProjectV2ItemFieldValue(input: {
                   projectId: $projectId,
@@ -112,12 +100,9 @@ jobs:
               projectId,
               itemId,
               fieldId,
-              optionId,
-              headers: {
-                authorization: `Bearer ${process.env.GITHUB_TOKEN}`
-              }
+              optionId
             });
 
             console.log(`Environment field updated to: ${environment}`);
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
