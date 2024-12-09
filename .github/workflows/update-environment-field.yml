@@ -49,14 +49,11 @@ jobs:
             });
 
             if (result.node.projectItems.nodes.length === 0) {
-              core.setFailed("No linked project found for the issue.");
+              throw new Error("No linked project found for the issue.");
             }
 
             const project = result.node.projectItems.nodes[0].project;
             const itemId = result.node.projectItems.nodes[0].id;
-
-            console.log("Linked Project ID:", project.id);
-            console.log("Linked Item ID:", itemId);
 
             return {
               projectId: project.id,
