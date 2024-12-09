@@ -1,7 +1,8 @@
 name: Bug Report
 description: File a bug report
-title: "[BUG]: About bug title"
 labels: ["bug"]
+title: "[BUG]: About bug title"
+projects: y-daiki-nakamura/projects/2
 
 body:
   - type: checkboxes
