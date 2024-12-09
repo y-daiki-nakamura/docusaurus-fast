@@ -9,59 +9,81 @@ jobs:
   update-environment:
     runs-on: ubuntu-latest
     steps:
+      # 環境情報をIssue Bodyから抽出
       - name: Extract Environment from Issue Body
         id: extract_env
         run: |
           echo "Extracting environment info..."
           ENVIRONMENT=$(echo "${{ github.event.issue.body }}" | grep "Environment | 環境情報:" | sed 's/Environment | 環境情報: //')
           echo "environment=${ENVIRONMENT}" >> $GITHUB_ENV
+        shell: bash
 
-      - name: Get Linked Project and Item ID
+      # 環境情報を確認
+      - name: Log Extracted Environment
+        run: echo "Extracted environment: ${{ env.environment }}"
+
+      # リトライしながらProject Itemを取得
+      - name: Retry to Get Linked Project and Item ID
         id: get_project_info
         uses: actions/github-script@v6.4.1
         with:
           script: |
             const issueId = context.payload.issue.node_id;
-            const result = await github.graphql(`
-              query($issueId: ID!) {
-                node(id: $issueId) {
-                  ... on Issue {
-                    projectItems(first: 1) {
-                      nodes {
-                        project {
+
+            let retries = 5;
+            let delay = 5000; // 5 seconds
+            let projectItems = null;
+
+            while (retries > 0) {
+              console.log(`Retrying to fetch project items... (${6 - retries})`);
+              projectItems = await github.graphql(`
+                query($issueId: ID!) {
+                  node(id: $issueId) {
+                    ... on Issue {
+                      projectItems(first: 1) {
+                        nodes {
                           id
+                          project {
+                            id
+                          }
                         }
-                        id
                       }
                     }
                   }
                 }
-              }
-            `, {
-              issueId
-            });
+              `, { issueId });
 
-            if (result.node.projectItems.nodes.length === 0) {
-              throw new Error("No linked project found for the issue.");
+              if (projectItems.node.projectItems.nodes.length > 0) {
+                console.log("Linked project found.");
+                break;
+              }
+
+              retries--;
+              await new Promise(resolve => setTimeout(resolve, delay));
             }
 
-            const project = result.node.projectItems.nodes[0].project;
-            const itemId = result.node.projectItems.nodes[0].id;
+            if (!projectItems || projectItems.node.projectItems.nodes.length === 0) {
+              throw new Error("No linked project found for the issue after multiple retries.");
+            }
 
-            core.setOutput("projectId", project.id);
-            core.setOutput("itemId", itemId);
+            const item = projectItems.node.projectItems.nodes[0];
+            core.setOutput("projectId", item.project.id);
+            core.setOutput("itemId", item.id);
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 環境情報をProject V2に設定
       - name: Update Environment Field in Project
         uses: actions/github-script@v6.4.1
         with:
           script: |
             const environment = process.env.environment;
-
             if (!environment) {
-              console.log("No environment value extracted. Skipping update.");
+              console.log("No environment value provided. Skipping update.");
               return;
             }
 
+            // 環境オプションをマッピング
             const environmentOptions = {
               "Development": "4fa26edc",
               "UAT": "329a3eec",
@@ -70,13 +92,12 @@ jobs:
 
             const optionId = environmentOptions[environment];
             if (!optionId) {
-              console.log(`Environment value '${environment}' does not match any known options.`);
-              return;
+              throw new Error(`Environment value '${environment}' does not match any known options.`);
             }
 
             const projectId = "${{ steps.get_project_info.outputs.projectId }}";
             const itemId = "${{ steps.get_project_info.outputs.itemId }}";
-            const fieldId = "PVTSSF_lAHOA1KAF84At_OYzgkqJe8"; // Replace with your actual field ID
+            const fieldId = "PVTSSF_lAHOA1KAF84At_OYzgkqJe8"; // EnvironmentフィールドID
 
             await github.graphql(`
               mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
@@ -97,3 +118,5 @@ jobs:
             });
 
             console.log(`Environment field updated to: ${environment}`);
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
