@@ -1,0 +1,96 @@
+name: Bug Report
+description: File a bug report
+title: "[BUG]: About bug title"
+labels: ["bug"]
+
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Have you selected the following information? | 以下の情報は選択しましたか？
+      description: >
+       - Labels
+       
+       - Projects
+       
+       - Milestone        
+      options:
+        - label: >
+            Labels: Selected.
+          required: true
+        - label: >
+            Projects Selected.
+          required: true     
+        - label: >
+            Milestone: Selected.
+          required: true
+          
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug | バグの詳細・発生した事象
+      placeholder: Please tell us more details./詳細を教えてください
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: To Reproduce | 再現手順
+      description: >
+        Steps to reproduce the behavior:
+      placeholder: >
+        1. Go to '...'  
+        
+        2. Click on '....'  
+        
+        3. Scroll down to '....'  
+        
+        4. See error  
+    validations:
+      required: true
+      
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior | 期待する動作
+      description: >
+        A clear and concise description of what you expected to happen.
+      placeholder: >
+        A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+        
+  - type: dropdown
+    id: enviroment
+    attributes:
+      label: Enviroment | 環境情報
+      options:
+        - Development
+        - User Acceptance Test
+        - Internal verification
+        - External verification
+        - QA
+        - Others
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version
+      options:
+        - 1.0.1
+        - 1.0.2
+        - 2.0.1
+      default: 0
+    validations:
+      required: true
+           
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context | 追加情報
+      description: >
+        Add any other context about the problem here.
