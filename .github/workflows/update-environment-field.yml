@@ -1,7 +1,7 @@
 name: Update Project Version Field (Fixed IDs)
 on:
   issues:
-    types: [opened, re-open]
+    types: [opened, reopened]
 
 permissions:
   contents: read
