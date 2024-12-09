@@ -1,122 +1,107 @@
-name: Update Environment Field in Project
-
+name: Update Project Version Field
 on:
   issues:
-    types:
-      - opened
+    types: [opened]
 
 jobs:
-  update-environment:
+  update-project-version:
     runs-on: ubuntu-latest
     steps:
-      # 環境情報をIssue Bodyから抽出
-      - name: Extract Environment from Issue Body
-        id: extract_env
+      - name: Extract "Version" from issue body
+        id: extract_version
         run: |
-          echo "Extracting environment info..."
-          ENVIRONMENT=$(echo "${{ github.event.issue.body }}" | grep "Environment | 環境情報:" | sed 's/Environment | 環境情報: //')
-          echo "environment=${ENVIRONMENT}" >> $GITHUB_ENV
-        shell: bash
+          BODY="${{ github.event.issue.body }}"
+          # "### Version" の次の行を取得する例
+          VERSION=$(echo "$BODY" | awk '/^### Version/{getline;print}')
+          # VERSIONが空の場合の対処など必要なら追記
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # 環境情報を確認
-      - name: Log Extracted Environment
-        run: echo "Extracted environment: ${{ env.environment }}"
-
-      # リトライしながらProject Itemを取得
-      - name: Retry to Get Linked Project and Item ID
-        id: get_project_info
-        uses: actions/github-script@v6.4.1
-        with:
-          script: |
-            const issueId = context.payload.issue.node_id;
-
-            let retries = 5;
-            let delay = 5000; // 5 seconds
-            let projectItems = null;
-
-            while (retries > 0) {
-              console.log(`Retrying to fetch project items... (${6 - retries})`);
-              projectItems = await github.graphql(`
-                query($issueId: ID!) {
-                  node(id: $issueId) {
-                    ... on Issue {
-                      projectItems(first: 1) {
-                        nodes {
-                          id
-                          project {
-                            id
-                          }
-                        }
-                      }
+      - name: Get Project Item ID and Project ID
+        id: get_ids
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_ID="${{ github.event.issue.node_id }}"
+          # Issue に紐付く Project Item および Project ID を取得する
+          QUERY='
+          query($issueId:ID!) {
+            node(id:$issueId) {
+              ... on Issue {
+                projectItems(first:10) {
+                  nodes {
+                    id
+                    project {
+                      id
+                      title
                     }
                   }
                 }
-              `, { issueId });
-
-              if (projectItems.node.projectItems.nodes.length > 0) {
-                console.log("Linked project found.");
-                break;
               }
-
-              retries--;
-              await new Promise(resolve => setTimeout(resolve, delay));
             }
+          }'
 
-            if (!projectItems || projectItems.node.projectItems.nodes.length === 0) {
-              throw new Error("No linked project found for the issue after multiple retries.");
-            }
+          # GraphQL 実行
+          RESULT=$(gh api graphql -f query="$QUERY" -f issueId="$ISSUE_ID")
+          ITEM_ID=$(echo "$RESULT" | jq -r '.data.node.projectItems.nodes[0].id')
+          PROJECT_ID=$(echo "$RESULT" | jq -r '.data.node.projectItems.nodes[0].project.id')
 
-            const item = projectItems.node.projectItems.nodes[0];
-            core.setOutput("projectId", item.project.id);
-            core.setOutput("itemId", item.id);
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 取得結果を出力
+          echo "item_id=$ITEM_ID" >> $GITHUB_OUTPUT
+          echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
 
-      # 環境情報をProject V2に設定
-      - name: Update Environment Field in Project
-        uses: actions/github-script@v6.4.1
-        with:
-          script: |
-            const environment = process.env.environment;
-            if (!environment) {
-              console.log("No environment value provided. Skipping update.");
-              return;
-            }
+      - name: Get Field ID for "Version"
+        id: get_field_id
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PROJECT_ID="${{ steps.get_ids.outputs.project_id }}"
 
-            // 環境オプションをマッピング
-            const environmentOptions = {
-              "Development": "4fa26edc",
-              "UAT": "329a3eec",
-              "Valid": "60906637"
-            };
-
-            const optionId = environmentOptions[environment];
-            if (!optionId) {
-              throw new Error(`Environment value '${environment}' does not match any known options.`);
-            }
-
-            const projectId = "${{ steps.get_project_info.outputs.projectId }}";
-            const itemId = "${{ steps.get_project_info.outputs.itemId }}";
-            const fieldId = "PVTSSF_lAHOA1KAF84At_OYzgkqJe8"; // EnvironmentフィールドID
-
-            await github.graphql(`
-              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                updateProjectV2ItemFieldValue(input: {
-                  projectId: $projectId,
-                  itemId: $itemId,
-                  fieldId: $fieldId,
-                  value: { singleSelectOptionId: $optionId }
-                }) {
-                  clientMutationId
+          # プロジェクトに紐付く全てのフィールドを取得して、"Version" という名前のフィールドIDを取得する例
+          QUERY='
+          query($projectId:ID!) {
+            node(id:$projectId) {
+              ... on ProjectNext {
+                fields(first:50) {
+                  nodes {
+                    id
+                    name
+                  }
                 }
               }
-            `, {
-              projectId,
-              itemId,
-              fieldId,
-              optionId
-            });
+            }
+          }'
+          RESULT=$(gh api graphql -f query="$QUERY" -f projectId="$PROJECT_ID")
+          VERSION_FIELD_ID=$(echo "$RESULT" | jq -r '.data.node.fields.nodes[] | select(.name=="Version") | .id')
 
-            console.log(`Environment field updated to: ${environment}`);
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          if [ -z "$VERSION_FIELD_ID" ]; then
+            echo "Versionフィールドが見つかりませんでした。"
+            exit 1
+          fi
+
+          echo "version_field_id=$VERSION_FIELD_ID" >> $GITHUB_OUTPUT
+
+      - name: Update the Version field in the Project
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PROJECT_ID="${{ steps.get_ids.outputs.project_id }}"
+          ITEM_ID="${{ steps.get_ids.outputs.item_id }}"
+          FIELD_ID="${{ steps.get_field_id.outputs.version_field_id }}"
+          VERSION="${{ steps.extract_version.outputs.version }}"
+
+          # Project の Version フィールド更新
+          MUTATION='
+          mutation($projectId:ID!,$itemId:ID!,$fieldId:ID!,$value:String!){
+            updateProjectNextItemField(input: {
+              projectId:$projectId
+              itemId:$itemId
+              fieldId:$fieldId
+              value:$value
+            }) {
+              projectNextItem {
+                id
+              }
+            }
+          }'
+
+          gh api graphql -f query="$MUTATION" -f projectId="$PROJECT_ID" -f itemId="$ITEM_ID" -f fieldId="$FIELD_ID" -f value="$VERSION"
