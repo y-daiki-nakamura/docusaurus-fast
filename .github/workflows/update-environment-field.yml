@@ -55,12 +55,10 @@ jobs:
             const project = result.node.projectItems.nodes[0].project;
             const itemId = result.node.projectItems.nodes[0].id;
 
-            return {
-              projectId: project.id,
-              itemId: itemId
-            };
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            core.setOutput("projectId", project.id);
+            core.setOutput("itemId", itemId);
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Environment Field in Project
         uses: actions/github-script@v6
@@ -114,5 +112,5 @@ jobs:
             });
 
             console.log(`Environment field updated to: ${environment}`);
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
