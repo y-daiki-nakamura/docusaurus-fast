@@ -60,7 +60,7 @@ jobs:
           QUERY='
           query($projectId:ID!) {
             node(id:$projectId) {
-              ... on ProjectNext {
+              ... on ProjectV2 {
                 fields(first:50) {
                   nodes {
                     id
