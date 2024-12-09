@@ -58,7 +58,7 @@ jobs:
             }
           }'
 
-          RESULT=$(gh api graphql -f query="$QUERY" -f owner="$OWNER" -f repo="$REPO" -f number="$NUMBER")
+          RESULT=$(gh api graphql -f query="$QUERY" -f owner="$OWNER" -f repo="$REPO" -f number=$NUMBER)
 
           echo "ProjectItems query result:"
           echo "$RESULT"
