@@ -1,7 +1,7 @@
-name: Update Project Version Field
+name: Update Project Version Field (Fixed IDs)
 on:
   issues:
-    types: [opened, reopened]
+    types: [opened, re-open]
 
 permissions:
   contents: read
@@ -26,11 +26,13 @@ jobs:
           echo "Extracted Version=$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Set Project ID (Fixed)
-        id: set_project_id
-        run: echo "project_id=PVT_kwHOA1KAF84At_OY" >> $GITHUB_OUTPUT
+      - name: Set Fixed Project/Field IDs
+        id: set_fixed_ids
+        run: |
+          echo "project_id=PVT_kwHOA1KAF84At_OYPVT_kwHOA1KAF84At_OY" >> $GITHUB_OUTPUT
+          echo "version_field_id=PVTF_lAHOA1KAF84At_OYzgkqVgI" >> $GITHUB_OUTPUT
 
-      - name: Get Project Item ID from Issue
+      - name: Get Project Item ID from Issue (Fixed Project ID)
         id: get_item_id
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -38,7 +40,7 @@ jobs:
           OWNER="${{ github.repository_owner }}"
           REPO="${{ github.event.repository.name }}"
           NUMBER=${{ github.event.issue.number }}
-          PROJECT_ID=${{ steps.set_project_id.outputs.project_id }}
+          PROJECT_ID=${{ steps.set_fixed_ids.outputs.project_id }}
 
           QUERY='
           query($owner:String!,$repo:String!,$number:Int!) {
@@ -61,7 +63,6 @@ jobs:
           echo "ProjectItems query result:"
           echo "$RESULT"
 
-          # 固定のPROJECT_IDに合致するitemを検索
           ITEM_ID=$(echo "$RESULT" | jq -r --arg PID "$PROJECT_ID" '.data.repository.issue.projectItems.nodes[] | select(.project.id==$PID) | .id')
 
           echo "ITEM_ID=$ITEM_ID"
@@ -72,120 +73,15 @@ jobs:
 
           echo "item_id=$ITEM_ID" >> $GITHUB_OUTPUT
 
-      - name: Get Fields from Project
-        id: get_fields
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PROJECT_ID=${{ steps.set_project_id.outputs.project_id }}
-
-          QUERY='
-          query($projectId:ID!) {
-            node(id:$projectId) {
-              ... on ProjectV2 {
-                fields(first: 50) {
-                  nodes {
-                    ... on ProjectV2SingleSelectField {
-                      __typename
-                      id
-                      name
-                      options {
-                        id
-                        name
-                      }
-                    }
-                    ... on ProjectV2Field {
-                      __typename
-                      id
-                      name
-                    }
-                  }
-                }
-              }
-            }
-          }
-          '
-
-          RESULT=$(gh api graphql -f query="$QUERY" -f projectId="$PROJECT_ID")
-          echo "Fields query result:"
-          echo "$RESULT"
-
-          VERSION_FIELD=$(echo "$RESULT" | jq -c '.data.node.fields.nodes[] | select(.name=="Version")')
-          if [ -z "$VERSION_FIELD" ]; then
-            echo "Version field not found."
-            exit 1
-          fi
-
-          VERSION_FIELD_ID=$(echo "$VERSION_FIELD" | jq -r '.id')
-          FIELD_TYPE=$(echo "$VERSION_FIELD" | jq -r '.__typename')
-          echo "Version field ID: $VERSION_FIELD_ID"
-          echo "Version field type: $FIELD_TYPE"
-
-          echo "version_field_id=$VERSION_FIELD_ID" >> $GITHUB_OUTPUT
-          echo "field_type=$FIELD_TYPE" >> $GITHUB_OUTPUT
-
-          if [ "$FIELD_TYPE" = "ProjectV2SingleSelectField" ]; then
-            echo "$VERSION_FIELD" | jq -c '.options' > options.json
-            echo "Single select options saved to options.json"
-          fi
-
-      - name: Determine Single Select Option
-        id: get_option
-        if: steps.get_fields.outputs.field_type == 'ProjectV2SingleSelectField'
-        run: |
-          VERSION="${{ steps.extract_version.outputs.version }}"
-          echo "Looking for option matching VERSION=$VERSION"
-          OPTION_ID=$(jq -r --arg ver "$VERSION" '.[] | select(.name==$ver) | .id' options.json)
-
-          if [ -z "$OPTION_ID" ]; then
-            echo "No matching single-select option found for Version=$VERSION"
-            echo "Available options:"
-            cat options.json
-            exit 1
-          fi
-
-          echo "Found option_id=$OPTION_ID"
-          echo "option_id=$OPTION_ID" >> $GITHUB_OUTPUT
-
-      - name: Update Field via github-script (single-select)
-        if: steps.get_fields.outputs.field_type == 'ProjectV2SingleSelectField'
+      - name: Update Field via github-script (text)
+        # ここでは Version フィールドがテキストフィールドであると仮定
+        # シングルセレクトの場合は value:{singleSelectOptionId:"..."} に変更が必要
         uses: actions/github-script@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          projectId: ${{ steps.set_project_id.outputs.project_id }}
+          projectId: ${{ steps.set_fixed_ids.outputs.project_id }}
           itemId: ${{ steps.get_item_id.outputs.item_id }}
-          fieldId: ${{ steps.get_fields.outputs.version_field_id }}
-          optionId: ${{ steps.get_option.outputs.option_id }}
-        with:
-          script: |
-            const { projectId, itemId, fieldId, optionId } = process.env;
-            const mutation = `mutation($projectId:ID!,$itemId:ID!,$fieldId:ID!,$value:ProjectV2FieldValue!) {
-              updateProjectV2ItemFieldValue(
-                input: { projectId:$projectId, itemId:$itemId, fieldId:$fieldId, value:{singleSelectOptionId:$value}}
-              ) {
-                projectV2Item {
-                  id
-                }
-              }
-            }`;
-
-            const result = await github.graphql(mutation, {
-              projectId,
-              itemId,
-              fieldId,
-              value: optionId
-            });
-
-            console.log("Update result:", result);
-
-      - name: Update Field via github-script (text fallback)
-        if: steps.get_fields.outputs.field_type != 'ProjectV2SingleSelectField'
-        uses: actions/github-script@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          projectId: ${{ steps.set_project_id.outputs.project_id }}
-          itemId: ${{ steps.get_item_id.outputs.item_id }}
-          fieldId: ${{ steps.get_fields.outputs.version_field_id }}
+          fieldId: ${{ steps.set_fixed_ids.outputs.version_field_id }}
           version: ${{ steps.extract_version.outputs.version }}
         with:
           script: |
