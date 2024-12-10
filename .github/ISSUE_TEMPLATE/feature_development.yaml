@@ -1,6 +1,6 @@
 name: 🛠️機能開発 / Feature Development
 description: 機能開発の進捗を管理するためのチケットを作成します。 / Create a ticket to manage the progress of feature development.
-title: "[Feature]:  "
+title: "[🛠️Feature]:  "
 labels:
   - feature
   - enhancement
