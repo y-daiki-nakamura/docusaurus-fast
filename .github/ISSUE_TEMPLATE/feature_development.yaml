@@ -1,0 +1,65 @@
+name: 機能開発 / Feature Development
+description: 機能開発の進捗を管理するためのチケットを作成します。 / Create a ticket to manage the progress of feature development.
+title: "[Feature]:  "
+labels:
+  - feature
+  - enhancement
+body:
+  - type: input
+    id: feature_name
+    attributes:
+      label: 📝 機能名 / Feature Name
+      description: 機能の名前を入力してください。 / Enter the name of the feature.
+      placeholder: "例: ダークモード対応 / e.g., Dark Mode Support"
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature_description
+    attributes:
+      label: 📋 概要 / Description
+      description: この機能の概要を記載してください。 / Provide a brief overview of the feature.
+      placeholder: |
+        例: ユーザーがUIを暗いテーマに切り替えられるようにする。  
+        / e.g., Allow users to switch the UI to a dark theme.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: ✅ 受け入れ条件 / Acceptance Criteria
+      description: この機能が完了とみなされるための条件を記載してください。 / Define the criteria for considering this feature as complete.
+      placeholder: |
+        例:  
+        - UI上で「ダークモード」の切り替えボタンが動作する。  
+        - ユーザー設定が保存され、次回アクセス時も反映される。  
+        / e.g.,  
+        - A toggle button for "Dark Mode" works in the UI.  
+        - User preferences are saved and persist on the next login.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: 🔨 必要なタスク / Required Tasks
+      description: この機能を実装するために必要な具体的なタスクをリストアップしてください。 / List the specific tasks required to implement this feature.
+      placeholder: |
+        例:  
+        - UIデザインを作成する  
+        - APIエンドポイントを追加する  
+        - 設定をデータベースに保存するロジックを実装する  
+        / e.g.,  
+        - Create UI design  
+        - Add API endpoints  
+        - Implement logic to save settings in the database.
+
+  - type: textarea
+    id: additional_notes
+    attributes:
+      label: 🗒️ その他のメモ / Additional Notes
+      description: この機能に関する補足情報があれば記載してください。 / Provide any additional information related to this feature.
+      placeholder: |
+        例: この機能の対象プラットフォームや参考資料へのリンク  
+        / e.g., Target platform for this feature or links to reference documents.
