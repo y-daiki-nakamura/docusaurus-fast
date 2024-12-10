@@ -6,8 +6,8 @@ body:
   - type: textarea
     id: current_issue
     attributes:
-      label: 🐛 今、起きている事 / Current Issue
-      description: 現在直面している具体的な問題を記載してください。 / Describe the specific issue you are facing.
+      label: 🐛 今、起きていること / Current Issue
+      description: 現在直面している問題を簡潔に記載してください。 / Briefly describe the issue you are facing.
       placeholder: |
         例:  
         - ユーザー新規登録をしようと、登録ボタンを押したらエラーになった。  
@@ -18,7 +18,7 @@ body:
   - type: textarea
     id: goal
     attributes:
-      label: 🎯 解決したい事 / Goal
+      label: 🎯 解決したいこと / Goal
       description: 実現したいことや期待する結果を記載してください。 / Describe what you want to achieve or the expected outcome.
       placeholder: |
         例:  
@@ -28,78 +28,55 @@ body:
       required: true
 
   - type: textarea
-    id: attempts
+    id: steps_and_results
     attributes:
-      label: 🔄 試したこと・再現手順 / What You Tried and Steps to Reproduce
-      description: 問題解決のために試したことや再現手順を記載してください。 / List the steps you’ve taken to solve the problem and how to reproduce it.
+      label: 🔄 試したこととその結果 / Steps Taken and Results
+      description: 試した内容と、その結果を記載してください。 / Describe the steps you have taken and the results.
       placeholder: |
         例:  
-        - フォーム送信時にリクエストヘッダーを変更してみたが、効果なし。  
-        / e.g., I tried modifying the request headers during form submission, but it didn’t resolve the issue.
+        - 登録ボタンを押すと、サーバーから500エラーが返ってきた。  
+        - デバッグしたところ、データベースへの接続がタイムアウトしていることが分かった。  
+        / e.g., When I click the "Register" button, I receive a 500 error from the server. Debugging shows a database connection timeout.
     validations:
       required: true
 
   - type: textarea
-    id: results
+    id: research_and_hypotheses
     attributes:
-      label: 📋 試した結果と期待する結果の違い / Results and Expected Outcome
-      description: 試した結果と期待する結果の差異を記載してください。 / Explain how the actual results differ from the expected ones.
+      label: 📚 調査内容と仮説 / Research and Hypotheses
+      description: 調査した内容や考えた仮説を記載してください。 / Provide the research you've done and any hypotheses you have.
       placeholder: |
         例:  
-        - 実際にはエラーが発生し、データベースに何も保存されなかった。  
-        - 期待していた結果は、登録成功のメッセージとデータベースへの保存。  
-        / e.g., The actual result was an error, and nothing was saved to the database. The expected outcome was a success message and data saved to the database.
-    validations:
-      required: true
-
-  - type: textarea
-    id: research
-    attributes:
-      label: 📚 調べた事、考えた仮説 / Research and Hypotheses
-      description: 調べたことや考えた仮説を記載してください。 / Describe what you’ve researched and any hypotheses you’ve formed.
-      placeholder: |
-        例:  
-        - 公式ドキュメントや関連する記事を参照した。（記事のURLを添付）  
-        - データベース設定が間違っている可能性があると考えた。  
-        / e.g., I referred to the official documentation and related articles (include article URLs). I hypothesized that the database configuration might be incorrect.
+        - 公式ドキュメントを確認し、接続タイムアウトの原因が設定不足である可能性があると考えた。  
+        - Stack Overflowで類似のケースを調べたが解決策は見つからなかった。  
+        / e.g., Checked the official documentation and hypothesized that the timeout is caused by misconfiguration. Searched Stack Overflow but didn't find a solution.
     validations:
       required: false
 
   - type: textarea
-    id: hypothesis_results
+    id: code_and_logs
     attributes:
-      label: 🧪 仮説を元に行った結果 / Results Based on Hypotheses
-      description: 仮説を基に実行した結果を記載してください。 / Describe the results of actions taken based on your hypotheses.
+      label: 💻 関連するコードやログ / Relevant Code and Logs
+      description: 問題に関連するコードやログを記載してください。 / Include relevant code snippets or logs related to the issue.
       placeholder: |
         例:  
-        - データベースの設定を確認したが、設定ミスは見つからなかった。  
-        / e.g., I checked the database settings but didn’t find any configuration errors.
-    validations:
-      required: false
-
-  - type: textarea
-    id: code_and_errors
-    attributes:
-      label: 💻 関連するコードやエラーメッセージ / Related Code or Error Messages
-      description: 関連するコードやエラーメッセージを記載してください。 / Include related code snippets or error messages.
-      placeholder: |
-        例:  
-        - エラー: `ValidationError: Missing required field`  
-        - コード例: `User.create({ name: '', email: '' });`  
+        - エラーメッセージ: `Error: Connection timeout at db.connect`  
+        - コード例: `db.connect({ host: 'localhost', port: 5432 })`  
         / e.g.,  
-        - Error: `ValidationError: Missing required field`  
-        - Code snippet: `User.create({ name: '', email: '' });`
+        - Error message: `Error: Connection timeout at db.connect`  
+        - Code snippet: `db.connect({ host: 'localhost', port: 5432 })`
     validations:
       required: false
 
   - type: textarea
     id: additional_information
     attributes:
-      label: 🗒️ 追加情報 / Additional Information
-      description: 質問に関連する補足情報や注意点を記載してください。 / Provide any additional context or considerations related to your question.
+      label: 🗒️ 補足情報 / Additional Information
+      description: 質問に関連するその他の情報を記載してください（任意）。 / Provide any additional context or considerations related to your question (optional).
       placeholder: |
         例:  
-        - 特定の環境でのみ問題が発生する。  
-        / e.g., The issue occurs only in a specific environment.
+        - この問題は特定のブラウザでのみ発生する。  
+        - モバイル環境では正常に動作するが、デスクトップ環境で問題が発生する。  
+        / e.g., The issue occurs only on specific browsers. It works fine on mobile but fails on desktop.
     validations:
       required: false
