@@ -1,7 +1,6 @@
-title: "❓[TechQA]: "
+title: "❓[Troubleshooting]: "
 labels:
   - question
-  - help wanted
 body:
   - type: textarea
     id: current_issue
