@@ -1,0 +1,65 @@
+name: 🚀 機能追加・要望 / Feature Request
+description: 新しい機能や改善点について提案する場合に使用してください。 / Use this template to propose new features or improvements.
+title: "[要望 / Feature] "
+labels:
+  - enhancement
+  - feature request
+body:
+  - type: input
+    id: feature_summary
+    attributes:
+      label: 📝 機能の概要 / Feature Summary
+      description: |
+        機能や改善点を簡潔に説明してください。  
+        / Provide a brief description of the feature or improvement.
+      placeholder: |
+        例: ユーザーがダークモードを選択できるようにする。  
+        / e.g., Allow users to select dark mode.
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature_purpose
+    attributes:
+      label: 🎯 機能の目的 / Feature Purpose
+      description: |
+        なぜこの機能が必要なのか、背景や目的を記載してください。  
+        / Describe why this feature is needed, including its purpose and background.
+      placeholder: |
+        例: 視覚的負担を減らし、夜間の利用を快適にするため。  
+        / e.g., Reduce eye strain and improve usability at night.
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation_idea
+    attributes:
+      label: 💡 実装案 / Implementation Idea
+      description: |
+        どのように機能を実装すべきか、アイデアや提案を記載してください。  
+        / Provide ideas or suggestions on how the feature can be implemented.
+      placeholder: |
+        例: 設定画面に「ダークモード」トグルを追加する。  
+        / e.g., Add a 'Dark Mode' toggle to the settings screen.
+
+  - type: textarea
+    id: expected_outcome
+    attributes:
+      label: 🌈 期待する成果 / Expected Outcome
+      description: |
+        この機能が実現された場合、どのような成果が期待されますか？  
+        / Describe the expected results if this feature is implemented.
+      placeholder: |
+        例: 視覚的な快適さが向上し、ユーザーの満足度が向上する。  
+        / e.g., Improved visual comfort and increased user satisfaction.
+
+  - type: textarea
+    id: additional_notes
+    attributes:
+      label: 🗒️ その他のメモ / Additional Notes
+      description: |
+        関連する情報や参考資料があれば記載してください。  
+        / Include any related information or references if available.
+      placeholder: |
+        例: 他のサービスの類似機能へのリンクやスクリーンショットなど。  
+        / e.g., Links to similar features in other services or screenshots.
