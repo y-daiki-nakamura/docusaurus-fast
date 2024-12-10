@@ -6,12 +6,15 @@ body:
   - type: textarea
     id: current_issue
     attributes:
-      label: 🐛 今、起きていること / Current Issue
-      description: 現在直面している問題を簡潔に記載してください。 / Briefly describe the issue you are facing.
+      label: 🐛 現在起きている問題 / Current Issue
+      description: 現在直面している具体的な問題を簡潔に記載してください。 / Briefly describe the issue you are facing.
       placeholder: |
         例:  
-        - ユーザー新規登録をしようと、登録ボタンを押したらエラーになった。  
-        / e.g., When I click the "Register" button for user sign-up, I encounter an error.
+        - ユーザーがAPIにリクエストを送信すると、500エラーが返ってくる。  
+        - GETリクエストを送信しても正しいデータが返ってこない。  
+        / e.g.,  
+        - When the user sends a request to the API, a 500 error is returned.  
+        - GET request does not return the correct data.
     validations:
       required: true
 
@@ -22,34 +25,45 @@ body:
       description: 実現したいことや期待する結果を記載してください。 / Describe what you want to achieve or the expected outcome.
       placeholder: |
         例:  
-        - ユーザー新規登録を実装し、データベースに保存したい。  
-        / e.g., I want to implement user sign-up and save data to the database.
+        - APIが正常に動作し、ユーザーリクエストに対して適切なレスポンスを返すこと。  
+        - 特定のエンドポイントから必要なデータを取得する。  
+        / e.g.,  
+        - The API should function properly and return the appropriate response to user requests.  
+        - Retrieve the necessary data from a specific endpoint.
     validations:
       required: true
 
   - type: textarea
-    id: steps_and_results
+    id: attempts_and_results
     attributes:
-      label: 🔄 試したこととその結果 / Steps Taken and Results
-      description: 試した内容と、その結果を記載してください。 / Describe the steps you have taken and the results.
+      label: 🔄 試したこととその結果 / Attempts and Results
+      description: 問題解決のために試したことや、実行した結果を記載してください。 / Describe the steps you’ve taken to solve the problem and the results.
       placeholder: |
         例:  
-        - 登録ボタンを押すと、サーバーから500エラーが返ってきた。  
-        - デバッグしたところ、データベースへの接続がタイムアウトしていることが分かった。  
-        / e.g., When I click the "Register" button, I receive a 500 error from the server. Debugging shows a database connection timeout.
+        - GETリクエストをPostmanで送信したところ、エラーコード500が返ってきた。  
+        - ログを確認すると、データベース接続エラーが原因の可能性があると判明。  
+        - ベアラートークンを変更して再試行したが、同じエラーが発生。  
+        / e.g.,  
+        - Sent a GET request via Postman and received error code 500.  
+        - Checked the logs and found that the issue might be a database connection error.  
+        - Changed the bearer token and retried, but the same error occurred.
     validations:
       required: true
 
   - type: textarea
     id: research_and_hypotheses
     attributes:
-      label: 📚 調査内容と仮説 / Research and Hypotheses
-      description: 調査した内容や考えた仮説を記載してください。 / Provide the research you've done and any hypotheses you have.
+      label: 📚 調べた事、考えた仮説 / Research and Hypotheses
+      description: 調べたことや考えた仮説を記載してください。 / Provide the research you've done and any hypotheses you have.
       placeholder: |
         例:  
-        - 公式ドキュメントを確認し、接続タイムアウトの原因が設定不足である可能性があると考えた。  
-        - Stack Overflowで類似のケースを調べたが解決策は見つからなかった。  
-        / e.g., Checked the official documentation and hypothesized that the timeout is caused by misconfiguration. Searched Stack Overflow but didn't find a solution.
+        - APIの公式ドキュメントを確認し、トークンのフォーマットが間違っている可能性を考えた。  
+        - Stack Overflowで「API 500 error」を検索し、似た事例を調査した。  
+        - エンドポイントのURLが間違っている可能性も考慮したが、正しいことを確認。  
+        / e.g.,  
+        - Checked the API's official documentation and suspected the token format might be incorrect.  
+        - Searched "API 500 error" on Stack Overflow and reviewed similar cases.  
+        - Considered that the endpoint URL might be wrong but confirmed it was correct.
     validations:
       required: false
 
@@ -60,11 +74,33 @@ body:
       description: 問題に関連するコードやログを記載してください。 / Include relevant code snippets or logs related to the issue.
       placeholder: |
         例:  
-        - エラーメッセージ: `Error: Connection timeout at db.connect`  
-        - コード例: `db.connect({ host: 'localhost', port: 5432 })`  
+        - エラーメッセージ: `Error: Database connection failed`  
+        - コード例:  
+          ```
+          fetch('https://api.example.com/data', {
+            method: 'GET',
+            headers: {
+              'Authorization': 'Bearer your_token_here'
+            }
+          })
+          .then(response => response.json())
+          .then(data => console.log(data))
+          .catch(error => console.error('Error:', error));
+          ```  
         / e.g.,  
-        - Error message: `Error: Connection timeout at db.connect`  
-        - Code snippet: `db.connect({ host: 'localhost', port: 5432 })`
+        - Error message: `Error: Database connection failed`  
+        - Code snippet:  
+          ```
+          fetch('https://api.example.com/data', {
+            method: 'GET',
+            headers: {
+              'Authorization': 'Bearer your_token_here'
+            }
+          })
+          .then(response => response.json())
+          .then(data => console.log(data))
+          .catch(error => console.error('Error:', error));
+          ```
     validations:
       required: false
 
@@ -75,8 +111,10 @@ body:
       description: 質問に関連するその他の情報を記載してください（任意）。 / Provide any additional context or considerations related to your question (optional).
       placeholder: |
         例:  
-        - この問題は特定のブラウザでのみ発生する。  
-        - モバイル環境では正常に動作するが、デスクトップ環境で問題が発生する。  
-        / e.g., The issue occurs only on specific browsers. It works fine on mobile but fails on desktop.
+        - 問題は特定のユーザーリクエストにのみ発生する。  
+        - 本番環境では正常だが、ステージング環境でのみ問題が発生する。  
+        / e.g.,  
+        - The issue occurs only for specific user requests.  
+        - The issue doesn't occur in production but only in the staging environment.
     validations:
       required: false
