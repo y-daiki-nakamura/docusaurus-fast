@@ -2,6 +2,7 @@ title: "[🚀Feature] "
 labels:
   - enhancement
   - feature request
+  - idea
 body:
   - type: input
     id: feature_summary
