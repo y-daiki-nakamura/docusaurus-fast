@@ -1,0 +1,46 @@
+name: 機能追加・要望
+description: 新しい機能や改善点について提案する場合に使用してください。
+title: "[要望] "
+labels:
+  - enhancement
+  - feature request
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🌟 機能の概要
+        追加したい機能や改善点について簡潔に説明してください。
+  - type: input
+    id: feature_summary
+    attributes:
+      label: 機能の概要
+      description: 機能や改善点を簡潔に説明してください。
+      placeholder: 例: ユーザーがダークモードを選択できるようにする。
+    validations:
+      required: true
+  - type: textarea
+    id: feature_purpose
+    attributes:
+      label: 機能の目的
+      description: なぜこの機能が必要なのか、背景や目的を記載してください。
+      placeholder: 例: 視覚的負担を減らし、夜間の利用を快適にするため。
+    validations:
+      required: true
+  - type: textarea
+    id: implementation_idea
+    attributes:
+      label: 実装案
+      description: どのように機能を実装すべきか、アイデアや提案を記載してください。
+      placeholder: 例: 設定画面に「ダークモード」トグルを追加する。
+  - type: textarea
+    id: expected_outcome
+    attributes:
+      label: 期待する成果
+      description: この機能が実現された場合、どのような成果が期待されますか？
+      placeholder: 例: 視覚的な快適さが向上し、ユーザーの満足度が向上する。
+  - type: textarea
+    id: additional_notes
+    attributes:
+      label: その他のメモ
+      description: 関連する情報や参考資料があれば記載してください。
+      placeholder: 例: 他のサービスの類似機能へのリンクやスクリーンショットなど。
