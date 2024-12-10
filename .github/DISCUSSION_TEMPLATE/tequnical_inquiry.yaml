@@ -1,0 +1,79 @@
+title: "❓[Technical Inquiry]: "
+labels:
+  - question
+  - help wanted
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: 🎯 実現したいこと / Goal
+      description: 実現したいことや期待する結果を記載してください。 / Describe what you want to achieve or the expected outcome.
+      placeholder: |
+        例:  
+        - ユーザーがフォームを送信できるようにしたい。  
+        - APIからのレスポンスデータを正しく解析したい。  
+        / e.g.,  
+        - I want users to be able to submit a form.  
+        - I want to correctly parse the response data from an API.
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempts
+    attributes:
+      label: 🔄 試したこと・再現手順 / Attempts and Steps to Reproduce
+      description: 問題を解決するために試した内容や再現手順を記載してください。 / List the steps you've taken to solve the problem and how to reproduce it.
+      placeholder: |
+        例:  
+        - フォーム送信時にリクエストヘッダーを変更してみたが、効果なし。  
+        - フロントエンドとバックエンド間の通信ログを確認したが異常なし。  
+        / e.g.,  
+        - I tried changing the request headers during form submission, but it didn’t work.  
+        - I checked the communication logs between the frontend and backend, but found no issues.
+    validations:
+      required: true
+
+  - type: textarea
+    id: research
+    attributes:
+      label: 📚 調査したこと（資料など） / Research (References)
+      description: 関連する資料や調査結果を記載してください。 / Provide the references or results of your investigation.
+      placeholder: |
+        例:  
+        - 関連する公式ドキュメントを確認したが該当箇所を見つけられなかった。  
+        - Stack Overflowで類似の質問を見つけたが解決策が適用できなかった。  
+        / e.g.,  
+        - I checked the official documentation but couldn’t find the relevant section.  
+        - I found a similar question on Stack Overflow, but the solution didn’t apply to my case.
+    validations:
+      required: false
+
+  - type: textarea
+    id: possible_cause
+    attributes:
+      label: 🧩 原因だと思われそうなこと / Possible Cause
+      description: 問題の原因として考えられることを記載してください。 / Mention anything you suspect might be causing the issue.
+      placeholder: |
+        例:  
+        - フォームデータのシリアライズ方法が間違っている可能性がある。  
+        - APIエンドポイントが正しく動作していない可能性がある。  
+        / e.g.,  
+        - The form data serialization method might be incorrect.  
+        - The API endpoint might not be functioning correctly.
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_information
+    attributes:
+      label: 🗒️ 追加情報 / Additional Information
+      description: 質問に関連する補足情報や注意点を記載してください。 / Provide any additional context, notes, or considerations related to your question.
+      placeholder: |
+        例:  
+        - 特定の環境でのみ問題が発生する。  
+        - この機能はモバイルデバイスでの使用を想定している。  
+        / e.g.,  
+        - The issue occurs only in a specific environment.  
+        - This feature is intended for use on mobile devices.
+    validations:
+      required: false
