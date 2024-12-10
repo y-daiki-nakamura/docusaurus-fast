@@ -1,10 +1,10 @@
-name: バグ報告 / Bug Report
+name: 🐛バグ報告 / Bug Report
 description: バグ報告を提出してください / File a bug report
 labels:
   - bug
 projects:
   - y-daiki-nakamura/2
-title: "[BUG]: About bug title"
+title: "🐛[BUG]: "
 
 body:
   - type: checkboxes
