@@ -1,7 +1,6 @@
 title: "[Feature Request]:  "
 labels:
   - enhancement
-  - feature request
 body:
   - type: input
     id: feature_summary
