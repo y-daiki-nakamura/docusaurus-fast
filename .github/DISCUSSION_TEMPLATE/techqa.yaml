@@ -4,62 +4,91 @@ labels:
   - help wanted
 body:
   - type: textarea
+    id: current_issue
+    attributes:
+      label: 🐛 今、起きている事 / Current Issue
+      description: 現在直面している具体的な問題を記載してください。 / Describe the specific issue you are facing.
+      placeholder: |
+        例:  
+        - ユーザー新規登録をしようと、登録ボタンを押したらエラーになった。  
+        / e.g., When I click the "Register" button for user sign-up, I encounter an error.
+    validations:
+      required: true
+
+  - type: textarea
     id: goal
     attributes:
-      label: 🎯 実現したいこと / Goal
+      label: 🎯 解決したい事 / Goal
       description: 実現したいことや期待する結果を記載してください。 / Describe what you want to achieve or the expected outcome.
       placeholder: |
         例:  
-        - ユーザーがフォームを送信できるようにしたい。  
-        - APIからのレスポンスデータを正しく解析したい。  
-        / e.g.,  
-        - I want users to be able to submit a form.  
-        - I want to correctly parse the response data from an API.
+        - ユーザー新規登録を実装し、データベースに保存したい。  
+        / e.g., I want to implement user sign-up and save data to the database.
     validations:
       required: true
 
   - type: textarea
     id: attempts
     attributes:
-      label: 🔄 試したこと・再現手順 / Attempts and Steps to Reproduce
-      description: 問題を解決するために試した内容や再現手順を記載してください。 / List the steps you've taken to solve the problem and how to reproduce it.
+      label: 🔄 試したこと・再現手順 / What You Tried and Steps to Reproduce
+      description: 問題解決のために試したことや再現手順を記載してください。 / List the steps you’ve taken to solve the problem and how to reproduce it.
       placeholder: |
         例:  
         - フォーム送信時にリクエストヘッダーを変更してみたが、効果なし。  
-        - フロントエンドとバックエンド間の通信ログを確認したが異常なし。  
-        / e.g.,  
-        - I tried changing the request headers during form submission, but it didn’t work.  
-        - I checked the communication logs between the frontend and backend, but found no issues.
+        / e.g., I tried modifying the request headers during form submission, but it didn’t resolve the issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: results
+    attributes:
+      label: 📋 試した結果と期待する結果の違い / Results and Expected Outcome
+      description: 試した結果と期待する結果の差異を記載してください。 / Explain how the actual results differ from the expected ones.
+      placeholder: |
+        例:  
+        - 実際にはエラーが発生し、データベースに何も保存されなかった。  
+        - 期待していた結果は、登録成功のメッセージとデータベースへの保存。  
+        / e.g., The actual result was an error, and nothing was saved to the database. The expected outcome was a success message and data saved to the database.
     validations:
       required: true
 
   - type: textarea
     id: research
     attributes:
-      label: 📚 調査したこと（資料など） / Research (References)
-      description: 関連する資料や調査結果を記載してください。 / Provide the references or results of your investigation.
+      label: 📚 調べた事、考えた仮説 / Research and Hypotheses
+      description: 調べたことや考えた仮説を記載してください。 / Describe what you’ve researched and any hypotheses you’ve formed.
       placeholder: |
         例:  
-        - 関連する公式ドキュメントを確認したが該当箇所を見つけられなかった。  
-        - Stack Overflowで類似の質問を見つけたが解決策が適用できなかった。  
-        / e.g.,  
-        - I checked the official documentation but couldn’t find the relevant section.  
-        - I found a similar question on Stack Overflow, but the solution didn’t apply to my case.
+        - 公式ドキュメントや関連する記事を参照した。（記事のURLを添付）  
+        - データベース設定が間違っている可能性があると考えた。  
+        / e.g., I referred to the official documentation and related articles (include article URLs). I hypothesized that the database configuration might be incorrect.
     validations:
       required: false
 
   - type: textarea
-    id: possible_cause
+    id: hypothesis_results
     attributes:
-      label: 🧩 原因だと思われそうなこと / Possible Cause
-      description: 問題の原因として考えられることを記載してください。 / Mention anything you suspect might be causing the issue.
+      label: 🧪 仮説を元に行った結果 / Results Based on Hypotheses
+      description: 仮説を基に実行した結果を記載してください。 / Describe the results of actions taken based on your hypotheses.
       placeholder: |
         例:  
-        - フォームデータのシリアライズ方法が間違っている可能性がある。  
-        - APIエンドポイントが正しく動作していない可能性がある。  
+        - データベースの設定を確認したが、設定ミスは見つからなかった。  
+        / e.g., I checked the database settings but didn’t find any configuration errors.
+    validations:
+      required: false
+
+  - type: textarea
+    id: code_and_errors
+    attributes:
+      label: 💻 関連するコードやエラーメッセージ / Related Code or Error Messages
+      description: 関連するコードやエラーメッセージを記載してください。 / Include related code snippets or error messages.
+      placeholder: |
+        例:  
+        - エラー: `ValidationError: Missing required field`  
+        - コード例: `User.create({ name: '', email: '' });`  
         / e.g.,  
-        - The form data serialization method might be incorrect.  
-        - The API endpoint might not be functioning correctly.
+        - Error: `ValidationError: Missing required field`  
+        - Code snippet: `User.create({ name: '', email: '' });`
     validations:
       required: false
 
@@ -67,13 +96,10 @@ body:
     id: additional_information
     attributes:
       label: 🗒️ 追加情報 / Additional Information
-      description: 質問に関連する補足情報や注意点を記載してください。 / Provide any additional context, notes, or considerations related to your question.
+      description: 質問に関連する補足情報や注意点を記載してください。 / Provide any additional context or considerations related to your question.
       placeholder: |
         例:  
         - 特定の環境でのみ問題が発生する。  
-        - この機能はモバイルデバイスでの使用を想定している。  
-        / e.g.,  
-        - The issue occurs only in a specific environment.  
-        - This feature is intended for use on mobile devices.
+        / e.g., The issue occurs only in a specific environment.
     validations:
       required: false
