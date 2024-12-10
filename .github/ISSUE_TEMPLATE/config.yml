@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 質問はこちら / Questions Here
+  - name: ❓質問はこちら / Questions Here
     url: https://github.com/y-daiki-nakamura/docusaurus-fast/discussions
     about: 質問や相談は、Discussions セクションをご利用ください。 / Please use the Discussions section for questions or general inquiries.
-  - name: 機能要望（アイデア）はこちら / Feature Request Here
+  - name: 💡機能要望（アイデア）はこちら / Feature Request Here
     url: https://github.com/y-daiki-nakamura/docusaurus-fast/discussions
     about: 機能要望（アイデア）は、Discussions セクションをご利用ください。 / Please use the Discussions section for feature requests or ideas.
