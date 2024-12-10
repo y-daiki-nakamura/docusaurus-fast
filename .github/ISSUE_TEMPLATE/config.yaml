@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 質問はこちら / Questions Here
+    url: https://github.com/y-daiki-nakamura/docusaurus-fast/discussions
+    about: 質問や相談は、Discussions セクションをご利用ください。 / Please use the Discussions section for questions or general inquiries.
