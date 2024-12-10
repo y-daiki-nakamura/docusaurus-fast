@@ -5,12 +5,6 @@ labels:
   - enhancement
   - feature request
 body:
-  - type: markdown
-    attributes:
-      value: |
-        ## 🌟 機能の概要 / Feature Overview
-        追加したい機能や改善点について簡潔に説明してください。 / Briefly describe the feature or improvement you want to propose.
-
   - type: input
     id: feature_summary
     attributes:
