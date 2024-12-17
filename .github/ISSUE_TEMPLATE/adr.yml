@@ -1,0 +1,91 @@
+name: 📜 アーキテクチャ設計記録 / Architectural Decision Record (ADR)
+description: アーキテクチャ上の重要な決定を記録する Issue を作成します。 / Create an issue to document significant architectural decisions.
+labels:
+  - adr
+title: "📜 [ADR]: "
+
+body:
+- type: textarea
+  attributes:
+    label: Context and Problem Statement / 文脈と問題の説明
+    description: Describe the context and problem statement. / 文脈と問題を説明してください。
+    placeholder: |
+      Example: Users experience inconsistent response times due to cache expiry issues. /
+      例: キャッシュの有効期限切れにより、ユーザーが一貫性のない応答時間を経験しています。
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Decision Drivers / 決定の要因
+    description: List the decision drivers influencing the decision. / 決定に影響を与える要因を列挙してください。
+    placeholder: |
+      Example:
+      * Scalability needs / スケーラビリティの必要性
+      * Cost considerations / コストの考慮
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Considered Options / 検討されたオプション
+    description: List the options considered to resolve the issue. / 問題解決のために検討したオプションを列挙してください。
+    placeholder: |
+      Example:
+      * Implement an LRU cache. / LRUキャッシュを実装する。
+      * Increase cache expiry time. / キャッシュの有効期限を延長する。
+      * Use a distributed caching mechanism. / 分散キャッシュメカニズムを使用する。
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Decision Outcome / 決定の結果
+    description: Specify the chosen option and justify the decision. / 選択したオプションを指定し、その決定を正当化してください。
+    placeholder: |
+      Example: Chosen option: 'Implement an LRU cache', because it offers the best balance of performance and resource usage. /
+      例: 選択したオプション: 'LRUキャッシュを実装する'、理由: パフォーマンスとリソース使用のバランスが最も良いため。
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Consequences / 結果
+    description: Describe the consequences of the decision, both positive and negative. / 決定の結果（肯定的および否定的）を説明してください。
+    placeholder: |
+      Example:
+      * Good: Improved response times. / 良い点: 応答時間が改善されました。
+      * Bad: Increased memory usage. / 悪い点: メモリ使用量が増加しました。
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Confirmation / 確認
+    description: Describe how the decision's implementation will be confirmed. / 決定内容の実装がどのように確認されるかを説明してください。
+    placeholder: |
+      Example: Design review / 設計レビュー
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Pros and Cons of the Options / オプションの利点と欠点
+    description: Describe the pros and cons of the considered options. / 検討したオプションの利点と欠点を説明してください。
+    placeholder: |
+      Example:
+      ### Option 1 / オプション1
+      * Good: {argument a} / 良い点: {要因a}
+      * Neutral: {argument b} / 中立: {要因b}
+      * Bad: {argument c} / 悪い点: {要因c}
+
+      ### Option 2 / オプション2
+      * Good: {argument x} / 良い点: {要因x}
+      * Neutral: {argument y} / 中立: {要因y}
+      * Bad: {argument z} / 悪い点: {要因z}
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: More Information / 追加情報
+    description: Provide additional information or references related to the decision. / 決定に関連する追加情報や参考資料を提供してください。
+    placeholder: |
+      Example:
+      * Link to related ADRs / 関連するADRへのリンク
+      * References to external documentation / 外部ドキュメントの参照
+  validations:
+    required: false
