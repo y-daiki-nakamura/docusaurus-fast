@@ -1,0 +1,35 @@
+name: 📜 アーキテクチャ設計記録(Minimal) / Architectural Decision Record (ADR)(Minimal) 
+description: アーキテクチャ上の重要な決定を記録するための Issue を作成します。 / Create an Issue to document significant architectural decisions.
+labels:
+  - adr
+title: "📜 [ADR]: "
+
+body:
+- type: textarea
+  attributes:
+    label: Context and Problem Statement / 文脈と問題の説明
+    description: Describe the context and problem statement. / 文脈と問題を説明してください。
+    placeholder: "Example: Users experience inconsistent response times due to cache expiry issues. / 例: キャッシュの有効期限切れにより、ユーザーが一貫性のない応答時間を経験しています。"
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Considered Options / 検討されたオプション
+    description: List the options considered to resolve the issue. / 問題解決のために検討したオプションを列挙してください。
+    placeholder: "Example:\n* Implement an LRU cache. / LRUキャッシュを実装する。\n* Increase cache expiry time. / キャッシュの有効期限を延長する。\n* Use a distributed caching mechanism. / 分散キャッシュメカニズムを使用する。"
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Decision Outcome / 決定の結果
+    description: Specify the chosen option and justify the decision. / 選択したオプションを指定し、その決定を正当化してください。
+    placeholder: "Example: Chosen option: 'Implement an LRU cache', because it offers the best balance of performance and resource usage. / 例: 選択したオプション: 'LRUキャッシュを実装する'、理由: パフォーマンスとリソース使用のバランスが最も良いため。"
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Consequences / 結果
+    description: Describe the consequences of the decision, both positive and negative. / 決定の結果（肯定的および否定的）を説明してください。
+    placeholder: "Example:\n* Good: Improved response times. / 良い点: 応答時間が改善されました。\n* Bad: Increased memory usage. / 悪い点: メモリ使用量が増加しました。"
+  validations:
+    required: false
